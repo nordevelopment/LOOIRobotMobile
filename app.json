@@ -15,9 +15,10 @@
     },
     "plugins": [
       [
-        "@react-native-voice/voice",
+        "expo-speech-recognition",
         {
-          "microphonePermission": "Разрешите доступ к микрофону для отправки голосовых команд роботу."
+          "microphonePermission": "Разрешите доступ к микрофону для отправки голосовых команд роботу.",
+          "speechRecognitionPermission": "Разрешите доступ к распознаванию речи для отправки голосовых команд роботу."
         }
       ]
     ],
