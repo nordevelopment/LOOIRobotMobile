@@ -38,13 +38,13 @@ export default function App() {
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [espIp, setEspIp] = useState('192.168.1.50');
   const [espIpInput, setEspIpInput] = useState('192.168.1.50');
-  
+
   // Бизнес-логика ИИ
   const [prompt, setPrompt] = useState('');
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isConfigVisible, setIsConfigVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Состояние лица робота и ручного пульта
   const [eyeState, setEyeState] = useState<EyeStateType>('normal');
   const [speechText, setSpeechText] = useState<string | null>(null);
@@ -65,7 +65,7 @@ export default function App() {
   const addLog = (text: string, type: 'info' | 'success' | 'error' | 'sent' | 'received' = 'info') => {
     const now = new Date();
     const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-    
+
     setLogs(prevLogs => [
       {
         id: Math.random().toString(),
@@ -129,7 +129,7 @@ export default function App() {
           useNativeDriver: Platform.OS !== 'web',
         }),
       ]).start();
-      
+
       const nextDelay = Math.random() * 5000 + 2500; // интервал моргания 2.5 - 7.5 секунд
       blinkTimeoutRef.current = setTimeout(triggerBlink, nextDelay);
     };
@@ -184,19 +184,19 @@ export default function App() {
   const updatePupils = (x: number, y: number) => {
     const centerX = SCREEN_WIDTH / 2;
     const centerY = SCREEN_HEIGHT / 2;
-    
+
     const dx = x - centerX;
     const dy = y - centerY;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    
+
     let targetX = dx;
     let targetY = dy;
-    
+
     if (distance > MAX_PUPIL_OFFSET) {
       targetX = (dx / distance) * MAX_PUPIL_OFFSET;
       targetY = (dy / distance) * MAX_PUPIL_OFFSET;
     }
-    
+
     Animated.spring(pupilOffset, {
       toValue: { x: targetX, y: targetY },
       useNativeDriver: Platform.OS !== 'web',
@@ -247,7 +247,7 @@ export default function App() {
     if (speechTimeoutRef.current) {
       clearTimeout(speechTimeoutRef.current);
     }
-    
+
     speechTimeoutRef.current = setTimeout(() => {
       Animated.timing(speechAnim, {
         toValue: 0,
@@ -271,12 +271,17 @@ export default function App() {
   const sendMoveCommand = async (direction: 'forward' | 'backward' | 'stop', duration: number) => {
     const targetUrl = `http://${espIp}/api/move`;
     addLog(`Отправка POST на ${targetUrl} (${direction}, ${duration}ms)`, 'info');
-    
+
     setEyeState(direction);
-    
+
+    // Таймер для вывода предупреждения, если плата не отвечает более 5 секунд
+    const warningTimeoutId = setTimeout(() => {
+      addLog(`Предупреждение: ESP32 (${espIp}) не отвечает более 5 секунд. Ожидаем ответа до 30 сек...`, 'error');
+    }, 5000);
+
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 секунд общий таймаут
 
       const response = await fetch(targetUrl, {
         method: 'POST',
@@ -286,17 +291,19 @@ export default function App() {
         body: JSON.stringify({ direction, duration }),
         signal: controller.signal,
       });
-      
+
       clearTimeout(timeoutId);
-      
+      clearTimeout(warningTimeoutId); // Сбрасываем предупреждение при успешном ответе
+
       if (response.ok) {
         addLog(`ESP32 успешно подтвердил команду движения!`, 'success');
       } else {
         addLog(`ESP32 ответил с кодом ошибки: ${response.status}`, 'error');
       }
     } catch (error: any) {
+      clearTimeout(warningTimeoutId); // Сбрасываем предупреждение при возникновении ошибки
       if (error.name === 'AbortError') {
-        addLog(`Таймаут соединения с ESP32 (${espIp})`, 'error');
+        addLog(`Ошибка: Превышен таймаут ожидания (30 секунд). ESP32 (${espIp}) не отвечает.`, 'error');
       } else {
         addLog(`Ошибка отправки к ESP32: ${error.message || error}`, 'error');
       }
@@ -305,7 +312,7 @@ export default function App() {
     if (moveTimeoutRef.current) {
       clearTimeout(moveTimeoutRef.current);
     }
-    
+
     // Возвращаем выражение глаз в обычное по истечении времени движения
     moveTimeoutRef.current = setTimeout(() => {
       setEyeState('normal');
@@ -329,6 +336,7 @@ export default function App() {
     addLog(`Промпт: "${currentPrompt}"`, 'sent');
 
     try {
+      console.log(currentPrompt);
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -383,11 +391,13 @@ export default function App() {
       }
 
       const data = await response.json();
-      const message = data.choices?.[0]?.message;
+      const message = data?.choices?.[0]?.message;
 
       if (!message) {
-        throw new Error('Получен пустой ответ от ИИ');
+        throw new Error(JSON.stringify(data));
       }
+
+      console.log('AI Response Message:', JSON.stringify(message, null, 2));
 
       // 1. Проверяем вызовы инструментов (Function Calling)
       if (message.tool_calls && message.tool_calls.length > 0) {
@@ -397,7 +407,7 @@ export default function App() {
           addLog(`Вызов инструмента: move_robot(${args.direction}, ${args.duration}ms)`, 'received');
           await sendMoveCommand(args.direction, args.duration);
         }
-      } 
+      }
       // 2. Если просто текстовый ответ
       else if (message.content) {
         addLog(`Ответ ИИ: "${message.content}"`, 'received');
@@ -456,14 +466,14 @@ export default function App() {
   return (
     <View style={styles.container}>
       <StatusBar hidden={true} />
-      
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
         {/* Главная интерактивная зона (лицо) */}
         <View style={styles.touchOverlay} {...panResponder.panHandlers}>
-          
+
           {/* Текстовое облачко мыслей/ответов ИИ */}
           {speechText && (
             <Animated.View style={[styles.speechBubble, { opacity: speechAnim }]}>
@@ -499,24 +509,24 @@ export default function App() {
           <View style={styles.manualControlPanel}>
             <Text style={styles.manualPanelTitle}>Ручной пульт управления моторами 🕹</Text>
             <View style={styles.manualButtonsRow}>
-              <TouchableOpacity 
-                style={[styles.manualButton, { borderColor: '#4CD964' }]} 
+              <TouchableOpacity
+                style={[styles.manualButton, { borderColor: '#4CD964' }]}
                 onPress={() => sendMoveCommand('forward', 1500)}
                 activeOpacity={0.7}
               >
                 <Text style={[styles.manualButtonText, { color: '#4CD964' }]}>▲ Вперед</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.manualButton, { borderColor: '#FF3B30' }]} 
+
+              <TouchableOpacity
+                style={[styles.manualButton, { borderColor: '#FF3B30' }]}
                 onPress={() => sendMoveCommand('stop', 0)}
                 activeOpacity={0.7}
               >
                 <Text style={[styles.manualButtonText, { color: '#FF3B30' }]}>🛑 СТОП</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.manualButton, { borderColor: '#FFCC00' }]} 
+
+              <TouchableOpacity
+                style={[styles.manualButton, { borderColor: '#FFCC00' }]}
                 onPress={() => sendMoveCommand('backward', 1500)}
                 activeOpacity={0.7}
               >
@@ -529,8 +539,8 @@ export default function App() {
         {/* Нижняя панель управления */}
         <View style={styles.bottomControlBar}>
           {/* Переключатель ручного пульта */}
-          <TouchableOpacity 
-            style={[styles.barIconButton, isManualVisible && styles.barIconButtonActive]} 
+          <TouchableOpacity
+            style={[styles.barIconButton, isManualVisible && styles.barIconButtonActive]}
             onPress={() => setIsManualVisible(!isManualVisible)}
             activeOpacity={0.7}
           >
@@ -549,7 +559,7 @@ export default function App() {
             {isLoading ? (
               <ActivityIndicator size="small" color={getEyeColor(eyeState)} style={{ marginRight: 8 }} />
             ) : (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.mainSendButton}
                 onPress={sendPromptToAI}
                 activeOpacity={0.7}
@@ -560,8 +570,8 @@ export default function App() {
           </View>
 
           {/* Кнопка настроек */}
-          <TouchableOpacity 
-            style={styles.barIconButton} 
+          <TouchableOpacity
+            style={styles.barIconButton}
             onPress={() => setIsConfigVisible(true)}
             activeOpacity={0.7}
           >
@@ -578,8 +588,8 @@ export default function App() {
             {/* Хедер консоли */}
             <View style={styles.overlayHeader}>
               <Text style={styles.overlayTitle}>Настройки ИИ и Сети 🤖</Text>
-              <TouchableOpacity 
-                style={styles.closeButton} 
+              <TouchableOpacity
+                style={styles.closeButton}
                 onPress={() => setIsConfigVisible(false)}
               >
                 <Text style={styles.closeButtonText}>✕</Text>
@@ -587,11 +597,11 @@ export default function App() {
             </View>
 
             <ScrollView style={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-              
+
               {/* Карта настроек */}
               <View style={styles.card}>
                 <Text style={styles.cardTitle}>Конфигурация Edge AI</Text>
-                
+
                 <Text style={styles.label}>OpenRouter API Key:</Text>
                 <TextInput
                   style={styles.input}
@@ -603,7 +613,7 @@ export default function App() {
                   autoCapitalize="none"
                   autoCorrect={false}
                 />
-                
+
                 <Text style={styles.label}>ESP32-S3 IP-адрес:</Text>
                 <TextInput
                   style={styles.input}
@@ -616,7 +626,7 @@ export default function App() {
                   autoCorrect={false}
                 />
 
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.saveButton}
                   onPress={handleSaveSettings}
                 >
@@ -756,35 +766,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingBottom: Platform.OS === 'ios' ? 25 : 15,
     paddingTop: 10,
-    backgroundColor: '#000000',
+    backgroundColor: '#0c0c0e', // Сделаем панель чуть светлее, чтобы она отделялась от лица
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.05)',
     width: '100%',
   },
   barIconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#1c1c1e', // Четкий темно-серый фон
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1.5,
+    borderColor: '#3a3a3c', // Заметный серый бордер
   },
   barIconButtonActive: {
     backgroundColor: 'rgba(0, 243, 255, 0.15)',
     borderColor: '#00F3FF',
   },
   barIconText: {
-    fontSize: 20,
+    fontSize: 22,
+    color: '#ffffff', // Гарантирует видимость текста/эмодзи
   },
   promptInputContainer: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    backgroundColor: '#1c1c1e', // Четкий темно-серый фон
     borderWidth: 1.5,
-    borderRadius: 22,
+    borderRadius: 23,
     marginHorizontal: 10,
-    height: 44,
+    height: 46,
     paddingHorizontal: 12,
   },
   mainPromptInput: {
