@@ -16,6 +16,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Voice from '@react-native-voice/voice';
 
 // Константы экрана и размеров глаз
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -44,6 +45,7 @@ export default function App() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isConfigVisible, setIsConfigVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
 
   // Состояние лица робота и ручного пульта
   const [eyeState, setEyeState] = useState<EyeStateType>('normal');
@@ -111,6 +113,71 @@ export default function App() {
       setIsConfigVisible(false);
     } catch (error) {
       addLog(`Не удалось сохранить настройки: ${error}`, 'error');
+    }
+  };
+
+  // Инициализация голосового ввода
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      Voice.onSpeechStart = () => {
+        setIsListening(true);
+        addLog('Микрофон активен. Говорите команду...', 'info');
+      };
+
+      Voice.onSpeechEnd = () => {
+        setIsListening(false);
+        addLog('Голосовой ввод завершен, распознавание...', 'info');
+      };
+
+      Voice.onSpeechResults = (e: any) => {
+        if (e.value && e.value.length > 0) {
+          const text = e.value[0];
+          setPrompt(text);
+          addLog(`Распознано: "${text}"`, 'success');
+          // Автоматическая отправка промпта к ИИ через полсекунды
+          setTimeout(() => {
+            sendPromptToAI(text);
+          }, 500);
+        }
+      };
+
+      Voice.onSpeechError = (e: any) => {
+        setIsListening(false);
+        setEyeState('normal');
+        addLog(`Ошибка Speech-to-Text: ${e.error?.message || JSON.stringify(e)}`, 'error');
+      };
+    }
+
+    return () => {
+      if (Platform.OS !== 'web') {
+        Voice.destroy().then(Voice.removeAllListeners);
+      }
+    };
+  }, []);
+
+  const startListening = async () => {
+    if (Platform.OS === 'web') {
+      addLog('Голосовой ввод не поддерживается в веб-версии', 'error');
+      return;
+    }
+    try {
+      setPrompt('');
+      setEyeState('thinking'); // Глаза переходят в режим пульсации при прослушивании
+      await Voice.start('ru-RU');
+    } catch (err: any) {
+      addLog(`Не удалось запустить микрофон: ${err.message || err}`, 'error');
+      setEyeState('normal');
+    }
+  };
+
+  const stopListening = async () => {
+    if (Platform.OS === 'web') return;
+    try {
+      await Voice.stop();
+      setIsListening(false);
+      setEyeState('normal');
+    } catch (err: any) {
+      addLog(`Не удалось остановить микрофон: ${err.message || err}`, 'error');
     }
   };
 
@@ -321,16 +388,19 @@ export default function App() {
   };
 
   // Отправка запроса в OpenRouter с Function Calling
-  const sendPromptToAI = async () => {
-    if (!prompt.trim()) return;
+  const sendPromptToAI = async (overridePrompt?: string) => {
+    const textToSend = overridePrompt !== undefined ? overridePrompt : prompt;
+    if (!textToSend.trim()) return;
     if (!apiKey) {
       addLog('Задайте API-ключ OpenRouter в настройках ⚙', 'error');
       setIsConfigVisible(true);
       return;
     }
 
-    const currentPrompt = prompt;
-    setPrompt('');
+    const currentPrompt = textToSend;
+    if (overridePrompt === undefined) {
+      setPrompt('');
+    }
     setIsLoading(true);
     setEyeState('thinking');
     addLog(`Промпт: "${currentPrompt}"`, 'sent');
@@ -342,7 +412,7 @@ export default function App() {
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://github.com/react-native-robot-face',
+          'HTTP-Referer': 'https://github.com/nordevelopment/LOOIRobotMobile',
           'X-Title': 'Robot Face AI Orchestrator',
         },
         body: JSON.stringify({
@@ -549,9 +619,23 @@ export default function App() {
 
           {/* Инпут для ИИ-команд */}
           <View style={[styles.promptInputContainer, { borderColor: getEyeColor(eyeState) }]}>
+            {/* Кнопка микрофона 🎙 для нативного Android/iOS (в вебе скрыта) */}
+            {Platform.OS !== 'web' && (
+              <TouchableOpacity
+                style={styles.micButton}
+                onPressIn={startListening}
+                onPressOut={stopListening}
+                activeOpacity={0.6}
+              >
+                <Text style={[styles.micIconText, isListening && { color: '#FF3B30' }]}>
+                  {isListening ? '🛑' : '🎙'}
+                </Text>
+              </TouchableOpacity>
+            )}
+
             <TextInput
               style={styles.mainPromptInput}
-              placeholder="Спроси или прикажи роботу..."
+              placeholder={isListening ? "Слушаю вас..." : "Спроси или прикажи роботу..."}
               placeholderTextColor="#555"
               value={prompt}
               onChangeText={setPrompt}
@@ -561,7 +645,7 @@ export default function App() {
             ) : (
               <TouchableOpacity
                 style={styles.mainSendButton}
-                onPress={sendPromptToAI}
+                onPress={() => sendPromptToAI()}
                 activeOpacity={0.7}
               >
                 <Text style={[styles.mainSendButtonText, { color: getEyeColor(eyeState) }]}>➔</Text>
@@ -805,6 +889,16 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 14,
     paddingVertical: 8,
+  },
+  micButton: {
+    padding: 6,
+    marginRight: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  micIconText: {
+    fontSize: 18,
+    color: '#8e8e93',
   },
   mainSendButton: {
     padding: 6,
