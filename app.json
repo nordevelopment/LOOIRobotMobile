@@ -20,6 +20,14 @@
           "microphonePermission": "Разрешите доступ к микрофону для отправки голосовых команд роботу."
         }
       ]
-    ]
+    ],
+    "android": {
+      "package": "com.nordeveloper.mobilerobot"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "f582cb46-6f1a-402a-b450-293f711896a6"
+      }
+    }
   }
 }
