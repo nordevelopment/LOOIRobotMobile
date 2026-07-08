@@ -18,9 +18,13 @@ interface ConfigOverlayProps {
   setApiKeyInput: (text: string) => void;
   espIpInput: string;
   setEspIpInput: (text: string) => void;
+  ttsEnabledInput: boolean;
+  setTtsEnabledInput: (value: boolean) => void;
   onSaveSettings: () => Promise<void>;
   logs: LogEntry[];
   clearLogs: () => void;
+  onClearHistory: () => void;
+  historyCount: number;
 }
 
 export function ConfigOverlay({
@@ -30,9 +34,13 @@ export function ConfigOverlay({
   setApiKeyInput,
   espIpInput,
   setEspIpInput,
+  ttsEnabledInput,
+  setTtsEnabledInput,
   onSaveSettings,
   logs,
   clearLogs,
+  onClearHistory,
+  historyCount,
 }: ConfigOverlayProps) {
   if (!isConfigVisible) return null;
 
@@ -94,6 +102,28 @@ export function ConfigOverlay({
               autoCapitalize="none"
               autoCorrect={false}
             />
+
+            <Text style={styles.label}>Голосовой ответ робота (TTS):</Text>
+            <TouchableOpacity
+              style={[styles.ttsButton, ttsEnabledInput ? styles.ttsButtonActive : styles.ttsButtonInactive]}
+              onPress={() => setTtsEnabledInput(!ttsEnabledInput)}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.ttsButtonText, ttsEnabledInput ? styles.ttsButtonTextActive : styles.ttsButtonTextInactive]}>
+                {ttsEnabledInput ? '🔊 Включен (Робот говорит)' : '🔇 Выключен (Без звука)'}
+              </Text>
+            </TouchableOpacity>
+
+            <Text style={styles.label}>Память диалога ИИ:</Text>
+            <TouchableOpacity
+              style={styles.clearHistoryButton}
+              onPress={onClearHistory}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.clearHistoryButtonText}>
+                🧠 Сбросить память диалога ({historyCount} соб.)
+              </Text>
+            </TouchableOpacity>
 
             <TouchableOpacity style={styles.saveButton} onPress={onSaveSettings}>
               <Text style={styles.saveButtonText}>Сохранить настройки</Text>
@@ -265,5 +295,44 @@ const styles = StyleSheet.create({
   },
   logReceived: {
     color: '#bf5af2',
+  },
+  ttsButton: {
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginBottom: 16,
+    borderWidth: 1,
+  },
+  ttsButtonActive: {
+    backgroundColor: 'rgba(0, 243, 255, 0.1)',
+    borderColor: '#00F3FF',
+  },
+  ttsButtonInactive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: '#2c2c2e',
+  },
+  ttsButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  ttsButtonTextActive: {
+    color: '#00F3FF',
+  },
+  ttsButtonTextInactive: {
+    color: '#8e8e93',
+  },
+  clearHistoryButton: {
+    backgroundColor: 'rgba(255, 59, 48, 0.12)',
+    borderColor: 'rgba(255, 59, 48, 0.4)',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  clearHistoryButtonText: {
+    color: '#FF3B30',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });

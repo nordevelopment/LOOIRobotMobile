@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Platform } from 'react-native';
 import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
+import * as Speech from 'expo-speech';
 
 interface UseSpeechProps {
   onStart?: () => void;
@@ -54,6 +55,12 @@ export function useSpeech({ onStart, onEnd, onResult, onError }: UseSpeechProps)
       if (!isAvailable) {
         onError?.('Speech recognition is not available on this device.');
         return;
+      }
+
+      try {
+        await Speech.stop();
+      } catch (e) {
+        // Ignore errors if Speech.stop fails or is unsupported
       }
 
       await ExpoSpeechRecognitionModule.start({

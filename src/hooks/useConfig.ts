@@ -7,6 +7,8 @@ export function useConfig() {
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [espIp, setEspIp] = useState('192.168.1.50');
   const [espIpInput, setEspIpInput] = useState('192.168.1.50');
+  const [ttsEnabled, setTtsEnabled] = useState(true);
+  const [ttsEnabledInput, setTtsEnabledInput] = useState(true);
   const [logs, setLogs] = useState<LogEntry[]>([]);
 
   // Add a log entry
@@ -38,6 +40,7 @@ export function useConfig() {
       try {
         const key = await AsyncStorage.getItem('OPENROUTER_API_KEY');
         const ip = await AsyncStorage.getItem('ESP32_IP_ADDRESS');
+        const ttsVal = await AsyncStorage.getItem('TTS_ENABLED');
         if (key) {
           setApiKey(key);
           setApiKeyInput(key);
@@ -45,6 +48,11 @@ export function useConfig() {
         if (ip) {
           setEspIp(ip);
           setEspIpInput(ip);
+        }
+        if (ttsVal !== null) {
+          const parsedTts = ttsVal === 'true';
+          setTtsEnabled(parsedTts);
+          setTtsEnabledInput(parsedTts);
         }
         addLog('Settings loaded successfully', 'info');
       } catch (error) {
@@ -60,8 +68,10 @@ export function useConfig() {
     try {
       await AsyncStorage.setItem('OPENROUTER_API_KEY', apiKeyInput);
       await AsyncStorage.setItem('ESP32_IP_ADDRESS', espIpInput);
+      await AsyncStorage.setItem('TTS_ENABLED', String(ttsEnabledInput));
       setApiKey(apiKeyInput);
       setEspIp(espIpInput);
+      setTtsEnabled(ttsEnabledInput);
       addLog('Settings saved successfully', 'success');
       return true;
     } catch (error) {
@@ -77,6 +87,9 @@ export function useConfig() {
     espIp,
     espIpInput,
     setEspIpInput,
+    ttsEnabled,
+    ttsEnabledInput,
+    setTtsEnabledInput,
     logs,
     addLog,
     clearLogs,

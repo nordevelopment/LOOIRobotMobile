@@ -1,19 +1,64 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { EyeStateType } from '../types';
+import * as Speech from 'expo-speech';
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
 
 interface UseRobotControlProps {
   apiKey: string;
   espIp: string;
+  ttsEnabled: boolean;
   addLog: (text: string, type: 'info' | 'success' | 'error' | 'sent' | 'received') => void;
 }
 
-export function useRobotControl({ apiKey, espIp, addLog }: UseRobotControlProps) {
+export function useRobotControl({ apiKey, espIp, ttsEnabled, addLog }: UseRobotControlProps) {
   const [eyeState, setEyeState] = useState<EyeStateType>('normal');
   const [speechText, setSpeechText] = useState<string | null>(null);
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const moveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const speechTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Load chat history from AsyncStorage on mount
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        const storedHistory = await AsyncStorage.getItem('CHAT_HISTORY');
+        if (storedHistory) {
+          setChatHistory(JSON.parse(storedHistory));
+        }
+      } catch (error) {
+        addLog(`Failed to load chat history: ${error}`, 'error');
+      }
+    };
+    loadHistory();
+  }, [addLog]);
+
+  // Helper to update and persist chat history
+  const updateChatHistory = useCallback(async (newMessages: ChatMessage[]) => {
+    try {
+      const trimmed = newMessages.slice(-25); // Limit to last 25 messages
+      setChatHistory(trimmed);
+      await AsyncStorage.setItem('CHAT_HISTORY', JSON.stringify(trimmed));
+    } catch (error) {
+      addLog(`Failed to save chat history: ${error}`, 'error');
+    }
+  }, [addLog]);
+
+  const clearChatHistory = useCallback(async () => {
+    try {
+      setChatHistory([]);
+      await AsyncStorage.removeItem('CHAT_HISTORY');
+      addLog('AI chat history cleared', 'success');
+    } catch (error) {
+      addLog(`Failed to clear chat history: ${error}`, 'error');
+    }
+  }, [addLog]);
 
   // Clear timers on unmount
   useEffect(() => {
@@ -39,6 +84,10 @@ export function useRobotControl({ apiKey, espIp, addLog }: UseRobotControlProps)
   // Send physical movement command to ESP32 board
   const sendMoveCommand = useCallback(
     async (direction: 'forward' | 'backward' | 'stop', duration: number) => {
+      try {
+        await Speech.stop();
+      } catch (e) {}
+
       const targetUrl = `http://${espIp}/api/move`;
       addLog(`Sending POST to ${targetUrl} (${direction}, ${duration}ms)`, 'info');
 
@@ -107,6 +156,21 @@ export function useRobotControl({ apiKey, espIp, addLog }: UseRobotControlProps)
       addLog(`Prompt: "${promptToSend}"`, 'sent');
 
       try {
+        await Speech.stop();
+      } catch (e) {}
+
+      const newUserMessage: ChatMessage = { role: 'user', content: promptToSend };
+      const messagesToSend = [
+        {
+          role: 'system',
+          content:
+            'You are the AI brain of the LOOI robot. You can move by triggering the `move_robot` tool. If the user asks you to move, go, turn, or stop, you MUST call the `move_robot` tool with appropriate parameters. If the request is not related to physical movement, respond with a text message. Be brief, warm, friendly, use emojis, and always respond in the user\'s language.',
+        },
+        ...chatHistory,
+        newUserMessage,
+      ];
+
+      try {
         const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -119,17 +183,7 @@ export function useRobotControl({ apiKey, espIp, addLog }: UseRobotControlProps)
             model: 'qwen/qwen-2.5-72b-instruct',
             temperature: 0.5,
             max_tokens: 200,
-            messages: [
-              {
-                role: 'system',
-                content:
-                  'You are the AI brain of the LOOI robot. You can move by triggering the `move_robot` tool. If the user asks you to move, go, turn, or stop, you MUST call the `move_robot` tool with appropriate parameters. If the request is not related to physical movement, respond with a text message. Be brief, warm, friendly, use emojis, and always respond in the user\'s language.',
-              },
-              {
-                role: 'user',
-                content: promptToSend,
-              },
-            ],
+            messages: messagesToSend,
             tools: [
               {
                 type: 'function',
@@ -177,6 +231,15 @@ export function useRobotControl({ apiKey, espIp, addLog }: UseRobotControlProps)
           if (toolCall.function.name === 'move_robot') {
             const args = JSON.parse(toolCall.function.arguments);
             addLog(`Tool call received: move_robot(${args.direction}, ${args.duration}ms)`, 'received');
+            
+            // Record physical movement in chat history as a log entry
+            const actionText = `[Выполнено движение: ${args.direction}, ${args.duration}мс]`;
+            await updateChatHistory([
+              ...chatHistory,
+              newUserMessage,
+              { role: 'assistant', content: actionText }
+            ]);
+
             await sendMoveCommand(args.direction, args.duration);
           }
         }
@@ -185,6 +248,24 @@ export function useRobotControl({ apiKey, espIp, addLog }: UseRobotControlProps)
           addLog(`AI Response: "${message.content}"`, 'received');
           showSpeechBubble(message.content);
           setEyeState('normal');
+
+          await updateChatHistory([
+            ...chatHistory,
+            newUserMessage,
+            { role: 'assistant', content: message.content }
+          ]);
+
+          if (ttsEnabled) {
+            try {
+              await Speech.speak(message.content, {
+                language: 'ru-RU',
+                pitch: 1.05,
+                rate: 1.0,
+              });
+            } catch (ttsErr: any) {
+              addLog(`TTS error: ${ttsErr.message || String(ttsErr)}`, 'error');
+            }
+          }
         }
       } catch (error: any) {
         addLog(`AI connection failed: ${error.message || error}`, 'error');
@@ -201,6 +282,8 @@ export function useRobotControl({ apiKey, espIp, addLog }: UseRobotControlProps)
     setEyeState,
     speechText,
     isLoading,
+    chatHistory,
+    clearChatHistory,
     sendMoveCommand,
     sendPromptToAI,
   };

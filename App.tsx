@@ -23,6 +23,9 @@ export default function App() {
     espIp,
     espIpInput,
     setEspIpInput,
+    ttsEnabled,
+    ttsEnabledInput,
+    setTtsEnabledInput,
     logs,
     addLog,
     clearLogs,
@@ -35,11 +38,14 @@ export default function App() {
     setEyeState,
     speechText,
     isLoading,
+    chatHistory,
+    clearChatHistory,
     sendMoveCommand,
     sendPromptToAI,
   } = useRobotControl({
     apiKey,
     espIp,
+    ttsEnabled,
     addLog,
   });
 
@@ -56,6 +62,7 @@ export default function App() {
       addLog(`Распознано: "${text}"`, 'success');
       setTimeout(() => {
         sendPromptToAI(text);
+        setPrompt('');
       }, 500);
     },
     onError: (err) => {
@@ -149,9 +156,13 @@ export default function App() {
           setApiKeyInput={setApiKeyInput}
           espIpInput={espIpInput}
           setEspIpInput={setEspIpInput}
+          ttsEnabledInput={ttsEnabledInput}
+          setTtsEnabledInput={setTtsEnabledInput}
           onSaveSettings={handleSaveSettings}
           logs={logs}
           clearLogs={clearLogs}
+          onClearHistory={clearChatHistory}
+          historyCount={chatHistory.length}
         />
       </View>
     </SafeAreaProvider>
