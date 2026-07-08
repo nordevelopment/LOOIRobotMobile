@@ -38,7 +38,7 @@ export function BottomControlBar({
   eyeColor,
 }: BottomControlBarProps) {
   const insets = useSafeAreaInsets();
-  
+
   // Добавляем 15 пикселей отступа, о которых просил пользователь, и Safe Area внизу
   const dynamicPaddingBottom = Math.max(insets.bottom, 0) + 15;
   const dynamicPaddingLeft = Math.max(insets.left, 15);
@@ -79,10 +79,15 @@ export function BottomControlBar({
 
         <TextInput
           style={styles.mainPromptInput}
-          placeholder={isListening ? 'Слушаю вас...' : 'Спроси или прикажи роботу...'}
+          placeholder={isListening ? "I'm listening to you..." : "Ask or command the robot..."}
           placeholderTextColor="#555"
           value={prompt}
           onChangeText={setPrompt}
+          autoComplete="off"
+          autoCorrect={false}
+          autoCapitalize="sentences"
+          textContentType="none"
+          importantForAutofill="no"
         />
 
         {isLoading ? (
