@@ -17,8 +17,8 @@
       [
         "expo-speech-recognition",
         {
-          "microphonePermission": "Разрешите доступ к микрофону для отправки голосовых команд роботу.",
-          "speechRecognitionPermission": "Разрешите доступ к распознаванию речи для отправки голосовых команд роботу."
+          "microphonePermission": "Allow access to the microphone to send voice commands to the robot.",
+          "speechRecognitionPermission": "Allow access to speech recognition to send voice commands to the robot."
         }
       ]
     ],

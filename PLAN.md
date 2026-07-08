@@ -9,7 +9,7 @@
 
 ### Что нужно сделать:
 * **Хранение истории**:
-  Внутри хука [useRobotControl.ts](file:///d:/MyFiles/AILab/MobileRobot/src/hooks/useRobotControl.ts) создадим состояние `chatHistory`:
+  Внутри хука [useRobotControl.ts](src/hooks/useRobotControl.ts) создадим состояние `chatHistory`:
   ```typescript
   const [chatHistory, setChatHistory] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([]);
   ```
@@ -22,7 +22,7 @@
   * Когда пользователь отправляет фразу $\rightarrow$ добавляем её в `chatHistory` с ролью `user`.
   * Когда ИИ возвращает текстовый ответ $\rightarrow$ добавляем его в `chatHistory` с ролью `assistant`.
 * **Очистка контекста**:
-  Добавим в настройки [ConfigOverlay.tsx](file:///d:/MyFiles/AILab/MobileRobot/src/components/ConfigOverlay.tsx) или на главный экран кнопку **"Сбросить память"** (очистить историю диалога), чтобы робот мог начать общение с чистого листа.
+  Добавим в настройки [ConfigOverlay.tsx](src/components/ConfigOverlay.tsx) или на главный экран кнопку **"Сбросить память"** (очистить историю диалога), чтобы робот мог начать общение с чистого листа.
 
 ---
 
@@ -31,13 +31,13 @@
 
 ### Что нужно сделать:
 * **Расширение конфигурации**:
-  В хуке [useConfig.ts](file:///d:/MyFiles/AILab/MobileRobot/src/hooks/useConfig.ts) добавим поля `aiModel` и `aiModelInput` (с дефолтным значением `qwen/qwen-2.5-72b-instruct`).
+  В хуке [useConfig.ts](src/hooks/useConfig.ts) добавим поля `aiModel` и `aiModelInput` (с дефолтным значением `qwen/qwen-2.5-72b-instruct`).
 * **Сохранение в хранилище**:
   Сохраняем выбранную модель в `AsyncStorage` под ключом `OPENROUTER_AI_MODEL`.
 * **UI в настройках**:
-  В [ConfigOverlay.tsx](file:///d:/MyFiles/AILab/MobileRobot/src/components/ConfigOverlay.tsx) добавим новое поле ввода для названия модели ИИ (или выпадающий список популярных вариантов: Qwen, Llama 3, Gemini Flash).
+  В [ConfigOverlay.tsx](src/components/ConfigOverlay.tsx) добавим новое поле ввода для названия модели ИИ (или выпадающий список популярных вариантов: Qwen, Llama 3, Gemini Flash).
 * **Динамический запрос**:
-  В [useRobotControl.ts](file:///d:/MyFiles/AILab/MobileRobot/src/hooks/useRobotControl.ts) подставим сохраненное значение модели в тело POST-запроса:
+  В [useRobotControl.ts](src/hooks/useRobotControl.ts) подставим сохраненное значение модели в тело POST-запроса:
   ```json
   "model": apiKey ? aiModel : "qwen/qwen-2.5-72b-instruct"
   ```
@@ -54,7 +54,7 @@
   npx expo install expo-speech
   ```
 * **Реализация озвучки**:
-  В [useRobotControl.ts](file:///d:/MyFiles/AILab/MobileRobot/src/hooks/useRobotControl.ts) импортируем `* as Speech` из `expo-speech` и при получении текстового ответа от ИИ вызываем:
+  В [useRobotControl.ts](src/hooks/useRobotControl.ts) импортируем `* as Speech` из `expo-speech` и при получении текстового ответа от ИИ вызываем:
   ```typescript
   Speech.speak(message.content, {
     language: 'ru-RU',
@@ -89,7 +89,7 @@
   }
   ```
 * **Реакция на стороне смартфона**:
-  * Если `obstacle_detected` равен `true`, прерываем таймер движения в [useRobotControl.ts](file:///d:/MyFiles/AILab/MobileRobot/src/hooks/useRobotControl.ts) и переключаем эмоцию в состояние `stop` (красный цвет глаз).
+  * Если `obstacle_detected` равен `true`, прерываем таймер движения в [useRobotControl.ts](src/hooks/useRobotControl.ts) и переключаем эмоцию в состояние `stop` (красный цвет глаз).
   * Можно добавить новую эмоцию `scared` (испуг с расширенными зрачками).
 * **Событийный промпт для ИИ**:
   При обнаружении препятствия приложение автоматически добавляет в историю диалога системное сообщение:
