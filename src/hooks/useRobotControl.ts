@@ -91,7 +91,7 @@ export function useRobotControl({ apiKey, espIp, ttsEnabled, aiModel, addLog }: 
     async (direction: 'forward' | 'backward' | 'stop', duration: number) => {
       try {
         await Speech.stop();
-      } catch (e) {}
+      } catch (e) { }
 
       const targetUrl = `http://${espIp}/api/move`;
       addLog(`Sending POST to ${targetUrl} (${direction}, ${duration}ms)`, 'info');
@@ -162,14 +162,14 @@ export function useRobotControl({ apiKey, espIp, ttsEnabled, aiModel, addLog }: 
 
       try {
         await Speech.stop();
-      } catch (e) {}
+      } catch (e) { }
 
       const newUserMessage: ChatMessage = { role: 'user', content: promptToSend };
       const messagesToSend = [
         {
           role: 'system',
           content:
-            'You are the AI brain of the LOOI robot. You can move by triggering the `move_robot` tool. If the user asks you to move, go, turn, or stop, you MUST call the `move_robot` tool with appropriate parameters. If the request is not related to physical movement, respond with a text message. Be brief, warm, friendly, use emojis, and always respond in the user\'s language.',
+            'ROLE: BIBO robot Companion. You can move by triggering the `move_robot` tool. If the user asks you to move, go, turn, or stop, you MUST call the `move_robot` tool with appropriate parameters. If the request is not related to physical movement, respond with a text message. Be brief, warm, friendly, use emojis moderately and always respond in the user\'s language.',
         },
         ...chatHistory,
         newUserMessage,
@@ -187,7 +187,7 @@ export function useRobotControl({ apiKey, espIp, ttsEnabled, aiModel, addLog }: 
           body: JSON.stringify({
             model: aiModel || CONFIG.DEFAULT_AI_MODEL,
             temperature: 0.5,
-            max_tokens: 200,
+            max_tokens: 150,
             messages: messagesToSend,
             tools: [
               {
@@ -236,7 +236,7 @@ export function useRobotControl({ apiKey, espIp, ttsEnabled, aiModel, addLog }: 
           if (toolCall.function.name === 'move_robot') {
             const args = JSON.parse(toolCall.function.arguments);
             addLog(`Tool call received: move_robot(${args.direction}, ${args.duration}ms)`, 'received');
-            
+
             // Record physical movement in chat history as a log entry
             const actionText = `[Выполнено движение: ${args.direction}, ${args.duration}мс]`;
             await updateChatHistory([

@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "mobilerobot",
-    "slug": "mobilerobot",
-    "version": "0.0.5",
+    "name": "BIBO Robot App",
+    "slug": "biborobotapp",
+    "version": "0.0.6",
     "orientation": "default",
     "userInterfaceStyle": "dark",
     "platforms": [
@@ -23,7 +23,7 @@
       ]
     ],
     "android": {
-      "package": "com.nordeveloper.mobilerobot",
+      "package": "com.nordeveloper.biborobotapp",
       "usesCleartextTraffic": true
     },
     "extra": {
