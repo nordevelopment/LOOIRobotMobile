@@ -76,9 +76,12 @@ export function useRobotControl({ apiKey, espIp, ttsEnabled, addLog }: UseRobotC
       clearTimeout(speechTimeoutRef.current);
     }
 
+    // Dynamic duration: 80ms per character, minimum 8 seconds, maximum 24 seconds
+    const displayDuration = Math.min(Math.max(text.length * 80, 8000), 24000);
+
     speechTimeoutRef.current = setTimeout(() => {
       setSpeechText(null);
-    }, 6000);
+    }, displayDuration);
   }, []);
 
   // Send physical movement command to ESP32 board
