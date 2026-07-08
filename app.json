@@ -23,7 +23,8 @@
       ]
     ],
     "android": {
-      "package": "com.nordeveloper.mobilerobot"
+      "package": "com.nordeveloper.mobilerobot",
+      "usesCleartextTraffic": true
     },
     "extra": {
       "eas": {

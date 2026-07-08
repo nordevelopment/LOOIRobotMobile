@@ -4,5 +4,5 @@ export const CONFIG = {
   DEFAULT_AI_MODEL: 'qwen/qwen3.5-flash-02-23',
   HTTP_REFERER: 'https://github.com/nordevelopment/LOOIRobotMobile',
   APP_TITLE: 'Robot Face AI Orchestrator',
-  DEFAULT_ESP32_IP: '192.168.1.50',
+  DEFAULT_ESP32_IP: '192.168.15.50',
 };

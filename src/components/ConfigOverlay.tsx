@@ -109,7 +109,7 @@ export function ConfigOverlay({
             <Text style={styles.label}>ESP32-S3 IP-адрес:</Text>
             <TextInput
               style={styles.input}
-              placeholder="Например, 192.168.1.50"
+              placeholder="Например, 192.168.15.50"
               placeholderTextColor="#555"
               value={espIpInput}
               onChangeText={setEspIpInput}
