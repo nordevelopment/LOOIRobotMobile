@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface BottomControlBarProps {
   prompt: string;
@@ -36,8 +37,22 @@ export function BottomControlBar({
   stopListening,
   eyeColor,
 }: BottomControlBarProps) {
+  const insets = useSafeAreaInsets();
+  
+  // Добавляем 15 пикселей отступа, о которых просил пользователь, и Safe Area внизу
+  const dynamicPaddingBottom = Math.max(insets.bottom, 0) + 15;
+  const dynamicPaddingLeft = Math.max(insets.left, 15);
+  const dynamicPaddingRight = Math.max(insets.right, 15);
+
   return (
-    <View style={styles.bottomControlBar}>
+    <View style={[
+      styles.bottomControlBar,
+      {
+        paddingBottom: dynamicPaddingBottom,
+        paddingLeft: dynamicPaddingLeft,
+        paddingRight: dynamicPaddingRight,
+      }
+    ]}>
       {/* Toggle manual remote panel */}
       <TouchableOpacity
         style={[styles.barIconButton, isManualVisible && styles.barIconButtonActive]}

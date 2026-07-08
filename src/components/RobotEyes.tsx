@@ -11,7 +11,7 @@ import {
 import { EyeStateType } from '../types';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const EYE_SIZE = 120;
+const EYE_SIZE = 100;
 const EYE_SPACING = 40;
 const MAX_PUPIL_OFFSET = 25;
 
@@ -29,6 +29,8 @@ export function RobotEyes({ eyeState, speechText }: RobotEyesProps) {
 
   // Refs for timers to avoid memory leaks
   const blinkTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isUserInteracting = useRef(false);
+  const idleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Helper to determine eye color by state
   const getEyeColor = (state: EyeStateType) => {
@@ -42,7 +44,7 @@ export function RobotEyes({ eyeState, speechText }: RobotEyesProps) {
       case 'thinking':
         return '#AF52DE'; // Purple - thinking
       default:
-        return '#00F3FF'; // Default neon cyan
+        return '#00d0ffff'; // Default neon cyan/blue
     }
   };
 
@@ -128,6 +130,110 @@ export function RobotEyes({ eyeState, speechText }: RobotEyesProps) {
     }
   }, [speechText, speechAnim]);
 
+  // Idle micro-animations effect (emotions)
+  useEffect(() => {
+    if (eyeState !== 'normal') {
+      if (idleTimeoutRef.current) clearTimeout(idleTimeoutRef.current);
+      return;
+    }
+
+    const triggerRandomAnimation = () => {
+      if (isUserInteracting.current || eyeState !== 'normal') {
+        scheduleNext();
+        return;
+      }
+
+      // Выбираем случайную анимацию:
+      // 0 - Оглядеться, 1 - Удивление, 2 - Прищур, 3 - Сонливость
+      const animType = Math.floor(Math.random() * 4);
+
+      if (animType === 0) {
+        // 1. Оглядеться (Look around)
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * (MAX_PUPIL_OFFSET - 5) + 5;
+        const targetX = Math.cos(angle) * dist;
+        const targetY = Math.sin(angle) * dist;
+
+        Animated.sequence([
+          Animated.timing(pupilOffset, {
+            toValue: { x: targetX, y: targetY },
+            duration: 800,
+            useNativeDriver: Platform.OS !== 'web',
+          }),
+          Animated.delay(1000),
+          Animated.spring(pupilOffset, {
+            toValue: { x: 0, y: 0 },
+            useNativeDriver: Platform.OS !== 'web',
+            friction: 6,
+            tension: 40,
+          }),
+        ]).start();
+      } else if (animType === 1) {
+        // 2. Интерес / Удивление (Surprise)
+        Animated.sequence([
+          Animated.timing(pupilScale, {
+            toValue: 1.35,
+            duration: 300,
+            useNativeDriver: Platform.OS !== 'web',
+          }),
+          Animated.delay(1000),
+          Animated.spring(pupilScale, {
+            toValue: 1.0,
+            useNativeDriver: Platform.OS !== 'web',
+            friction: 5,
+            tension: 40,
+          }),
+        ]).start();
+      } else if (animType === 2) {
+        // 3. Подозрительный прищур (Squint)
+        Animated.sequence([
+          Animated.timing(blinkAnim, {
+            toValue: 0.55,
+            duration: 400,
+            useNativeDriver: Platform.OS !== 'web',
+          }),
+          Animated.delay(1200),
+          Animated.timing(blinkAnim, {
+            toValue: 1.0,
+            duration: 300,
+            useNativeDriver: Platform.OS !== 'web',
+          }),
+        ]).start();
+      } else if (animType === 3) {
+        // 4. Сонливость (Drowsy)
+        Animated.sequence([
+          Animated.timing(blinkAnim, {
+            toValue: 0.25,
+            duration: 1800,
+            useNativeDriver: Platform.OS !== 'web',
+          }),
+          Animated.delay(400),
+          Animated.timing(blinkAnim, {
+            toValue: 1.0,
+            duration: 150,
+            useNativeDriver: Platform.OS !== 'web',
+          }),
+        ]).start();
+      }
+
+      scheduleNext();
+    };
+
+    const scheduleNext = () => {
+      if (idleTimeoutRef.current) clearTimeout(idleTimeoutRef.current);
+      // Рандомный интервал от 20 до 45 секунд
+      const nextDelay = Math.random() * 25000 + 20000;
+      idleTimeoutRef.current = setTimeout(triggerRandomAnimation, nextDelay);
+    };
+
+    // Запускаем первую анимацию через 5 секунд простоя
+    idleTimeoutRef.current = setTimeout(triggerRandomAnimation, 5000);
+
+    return () => {
+      if (idleTimeoutRef.current) clearTimeout(idleTimeoutRef.current);
+    };
+  }, [eyeState, blinkAnim, pupilOffset, pupilScale]);
+
   // Update pupil position based on layout coordinates
   const updatePupils = (x: number, y: number) => {
     const centerX = SCREEN_WIDTH / 2;
@@ -159,12 +265,18 @@ export function RobotEyes({ eyeState, speechText }: RobotEyesProps) {
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: (evt) => {
+        isUserInteracting.current = true;
+        // Прерываем прищур или удивление при прикосновении
+        Animated.spring(pupilScale, { toValue: 1.0, useNativeDriver: Platform.OS !== 'web' }).start();
+        Animated.spring(blinkAnim, { toValue: 1.0, useNativeDriver: Platform.OS !== 'web' }).start();
         updatePupils(evt.nativeEvent.pageX, evt.nativeEvent.pageY);
       },
       onPanResponderMove: (evt) => {
+        isUserInteracting.current = true;
         updatePupils(evt.nativeEvent.pageX, evt.nativeEvent.pageY);
       },
       onPanResponderRelease: () => {
+        isUserInteracting.current = false;
         Animated.spring(pupilOffset, {
           toValue: { x: 0, y: 0 },
           useNativeDriver: Platform.OS !== 'web',
@@ -173,6 +285,7 @@ export function RobotEyes({ eyeState, speechText }: RobotEyesProps) {
         }).start();
       },
       onPanResponderTerminate: () => {
+        isUserInteracting.current = false;
         Animated.spring(pupilOffset, {
           toValue: { x: 0, y: 0 },
           useNativeDriver: Platform.OS !== 'web',

@@ -96,7 +96,9 @@ export function useRobotControl({ apiKey, espIp, addLog }: UseRobotControlProps)
     async (promptToSend: string) => {
       if (!promptToSend.trim()) return;
       if (!apiKey) {
-        addLog('Please set OpenRouter API Key in settings ⚙', 'error');
+        addLog('Error: The AI API key is not configured in the settings ⚙', 'error');
+        showSpeechBubble('Error: The AI API key is not configured in the settings ⚙');
+        setEyeState('normal');
         return;
       }
 
@@ -115,11 +117,13 @@ export function useRobotControl({ apiKey, espIp, addLog }: UseRobotControlProps)
           },
           body: JSON.stringify({
             model: 'qwen/qwen-2.5-72b-instruct',
+            temperature: 0.5,
+            max_tokens: 200,
             messages: [
               {
                 role: 'system',
                 content:
-                  'Вы — ИИ-мозг робота LOOI. Вы можете перемещаться, запуская инструмент `move_robot`. Если пользователь просит вас поехать, пойти, повернуться или остановиться, вы ДОЛЖНЫ вызвать инструмент `move_robot` с соответствующими параметрами. Если запрос не связан с физическим движением, ответьте текстом (будьте краткими, теплыми и дружелюбными, пишите на русском языке, используйте эмодзи).',
+                  'You are the AI brain of the LOOI robot. You can move by triggering the `move_robot` tool. If the user asks you to move, go, turn, or stop, you MUST call the `move_robot` tool with appropriate parameters. If the request is not related to physical movement, respond with a text message. Be brief, warm, friendly, use emojis, and always respond in the user\'s language.',
               },
               {
                 role: 'user',
@@ -131,7 +135,7 @@ export function useRobotControl({ apiKey, espIp, addLog }: UseRobotControlProps)
                 type: 'function',
                 function: {
                   name: 'move_robot',
-                  description: 'Управляет физическим движением колесного робота в пространстве.',
+                  description: 'Controls the physical movement of a wheeled robot in space.',
                   parameters: {
                     type: 'object',
                     properties: {
@@ -139,11 +143,11 @@ export function useRobotControl({ apiKey, espIp, addLog }: UseRobotControlProps)
                         type: 'string',
                         enum: ['forward', 'backward', 'stop'],
                         description:
-                          'Направление движения: forward (вперед), backward (назад), stop (стоп/остановка)',
+                          'Direction of movement: forward (forward), backward (backward), stop (stop)',
                       },
                       duration: {
                         type: 'integer',
-                        description: 'Время движения робота в миллисекундах.',
+                        description: 'Time of robot movement in milliseconds.',
                       },
                     },
                     required: ['direction', 'duration'],

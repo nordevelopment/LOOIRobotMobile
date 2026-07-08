@@ -2,8 +2,8 @@
   "expo": {
     "name": "mobilerobot",
     "slug": "mobilerobot",
-    "version": "1.0.0",
-    "orientation": "portrait",
+    "version": "0.0.3",
+    "orientation": "default",
     "userInterfaceStyle": "dark",
     "platforms": [
       "ios",
