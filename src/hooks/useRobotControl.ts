@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { EyeStateType } from '../types';
 import * as Speech from 'expo-speech';
+import { CONFIG } from '../config';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -12,10 +13,11 @@ interface UseRobotControlProps {
   apiKey: string;
   espIp: string;
   ttsEnabled: boolean;
+  aiModel: string;
   addLog: (text: string, type: 'info' | 'success' | 'error' | 'sent' | 'received') => void;
 }
 
-export function useRobotControl({ apiKey, espIp, ttsEnabled, addLog }: UseRobotControlProps) {
+export function useRobotControl({ apiKey, espIp, ttsEnabled, aiModel, addLog }: UseRobotControlProps) {
   const [eyeState, setEyeState] = useState<EyeStateType>('normal');
   const [speechText, setSpeechText] = useState<string | null>(null);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
@@ -174,16 +176,16 @@ export function useRobotControl({ apiKey, espIp, ttsEnabled, addLog }: UseRobotC
       ];
 
       try {
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        const response = await fetch(CONFIG.OPENROUTER_API_URL, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json',
-            'HTTP-Referer': 'https://github.com/nordevelopment/LOOIRobotMobile',
-            'X-Title': 'Robot Face AI Orchestrator',
+            'HTTP-Referer': CONFIG.HTTP_REFERER,
+            'X-Title': CONFIG.APP_TITLE,
           },
           body: JSON.stringify({
-            model: 'qwen/qwen-2.5-72b-instruct',
+            model: aiModel || CONFIG.DEFAULT_AI_MODEL,
             temperature: 0.5,
             max_tokens: 200,
             messages: messagesToSend,

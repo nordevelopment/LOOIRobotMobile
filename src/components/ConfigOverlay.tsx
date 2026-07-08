@@ -20,6 +20,8 @@ interface ConfigOverlayProps {
   setEspIpInput: (text: string) => void;
   ttsEnabledInput: boolean;
   setTtsEnabledInput: (value: boolean) => void;
+  aiModelInput: string;
+  setAiModelInput: (text: string) => void;
   onSaveSettings: () => Promise<void>;
   logs: LogEntry[];
   clearLogs: () => void;
@@ -36,6 +38,8 @@ export function ConfigOverlay({
   setEspIpInput,
   ttsEnabledInput,
   setTtsEnabledInput,
+  aiModelInput,
+  setAiModelInput,
   onSaveSettings,
   logs,
   clearLogs,
@@ -87,6 +91,17 @@ export function ConfigOverlay({
               value={apiKeyInput}
               onChangeText={setApiKeyInput}
               secureTextEntry={true}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+
+            <Text style={styles.label}>ИИ-модель OpenRouter:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Например, qwen/qwen3.5-flash-02-23"
+              placeholderTextColor="#555"
+              value={aiModelInput}
+              onChangeText={setAiModelInput}
               autoCapitalize="none"
               autoCorrect={false}
             />

@@ -26,6 +26,9 @@ export default function App() {
     ttsEnabled,
     ttsEnabledInput,
     setTtsEnabledInput,
+    aiModel,
+    aiModelInput,
+    setAiModelInput,
     logs,
     addLog,
     clearLogs,
@@ -46,6 +49,7 @@ export default function App() {
     apiKey,
     espIp,
     ttsEnabled,
+    aiModel,
     addLog,
   });
 
@@ -158,6 +162,8 @@ export default function App() {
           setEspIpInput={setEspIpInput}
           ttsEnabledInput={ttsEnabledInput}
           setTtsEnabledInput={setTtsEnabledInput}
+          aiModelInput={aiModelInput}
+          setAiModelInput={setAiModelInput}
           onSaveSettings={handleSaveSettings}
           logs={logs}
           clearLogs={clearLogs}

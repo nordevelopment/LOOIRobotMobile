@@ -1,14 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LogEntry } from '../types';
+import { CONFIG } from '../config';
 
 export function useConfig() {
   const [apiKey, setApiKey] = useState('');
   const [apiKeyInput, setApiKeyInput] = useState('');
-  const [espIp, setEspIp] = useState('192.168.1.50');
-  const [espIpInput, setEspIpInput] = useState('192.168.1.50');
+  const [espIp, setEspIp] = useState(CONFIG.DEFAULT_ESP32_IP);
+  const [espIpInput, setEspIpInput] = useState(CONFIG.DEFAULT_ESP32_IP);
   const [ttsEnabled, setTtsEnabled] = useState(true);
   const [ttsEnabledInput, setTtsEnabledInput] = useState(true);
+  const [aiModel, setAiModel] = useState(CONFIG.DEFAULT_AI_MODEL);
+  const [aiModelInput, setAiModelInput] = useState(CONFIG.DEFAULT_AI_MODEL);
   const [logs, setLogs] = useState<LogEntry[]>([]);
 
   // Add a log entry
@@ -41,6 +44,7 @@ export function useConfig() {
         const key = await AsyncStorage.getItem('OPENROUTER_API_KEY');
         const ip = await AsyncStorage.getItem('ESP32_IP_ADDRESS');
         const ttsVal = await AsyncStorage.getItem('TTS_ENABLED');
+        const storedModel = await AsyncStorage.getItem('OPENROUTER_AI_MODEL');
         if (key) {
           setApiKey(key);
           setApiKeyInput(key);
@@ -53,6 +57,10 @@ export function useConfig() {
           const parsedTts = ttsVal === 'true';
           setTtsEnabled(parsedTts);
           setTtsEnabledInput(parsedTts);
+        }
+        if (storedModel) {
+          setAiModel(storedModel);
+          setAiModelInput(storedModel);
         }
         addLog('Settings loaded successfully', 'info');
       } catch (error) {
@@ -69,9 +77,11 @@ export function useConfig() {
       await AsyncStorage.setItem('OPENROUTER_API_KEY', apiKeyInput);
       await AsyncStorage.setItem('ESP32_IP_ADDRESS', espIpInput);
       await AsyncStorage.setItem('TTS_ENABLED', String(ttsEnabledInput));
+      await AsyncStorage.setItem('OPENROUTER_AI_MODEL', aiModelInput);
       setApiKey(apiKeyInput);
       setEspIp(espIpInput);
       setTtsEnabled(ttsEnabledInput);
+      setAiModel(aiModelInput);
       addLog('Settings saved successfully', 'success');
       return true;
     } catch (error) {
@@ -90,6 +100,9 @@ export function useConfig() {
     ttsEnabled,
     ttsEnabledInput,
     setTtsEnabledInput,
+    aiModel,
+    aiModelInput,
+    setAiModelInput,
     logs,
     addLog,
     clearLogs,
