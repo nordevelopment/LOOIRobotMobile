@@ -1,6 +1,6 @@
 {
-  "name": "mobilerobot",
-  "version": "0.0.5",
+  "name": "bibo-robot-mobile-app",
+  "version": "0.0.6",
   "private": true,
   "scripts": {
     "android": "expo run:android",

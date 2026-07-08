@@ -24,12 +24,16 @@
     ],
     "android": {
       "package": "com.nordeveloper.biborobotapp",
-      "usesCleartextTraffic": true
+      "usesCleartextTraffic": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "extra": {
       "eas": {
-        "projectId": "f582cb46-6f1a-402a-b450-293f711896a6"
+        "projectId": "1c2874c6-cd08-47a1-bf81-69bcbfab7698"
       }
-    }
+    },
+    "owner": "nordeveloper"
   }
 }
