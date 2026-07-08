@@ -1166,3 +1166,42 @@
 {"_e":"devserver:start","_t":1783496335772,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../..\\..\\app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
 {"_e":"metro:config","_t":1783496336497,"serverRoot":"../..\\..","projectRoot":"../..\\..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
 {"_e":"expo:dev-tools-plugin:load","_t":1783496337111,"plugins":[]}
+{"_e":"metro:instantiate","_t":1783496343344,"atlas":false,"workers":3,"host":"::","port":8081}
+{"_e":"metro:bundling:started","_t":1783496343821,"id":"1","platform":"web","environment":null,"entry":"index.js"}
+{"_e":"metro:bundling:progress","_t":1783496343821,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1783496343825,"id":"1","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1783496343924,"id":"1","progress":0.6889,"total":100,"current":83}
+{"_e":"metro:bundling:progress","_t":1783496344036,"id":"1","progress":0.7798954292460786,"total":154,"current":136}
+{"_e":"metro:bundling:progress","_t":1783496344145,"id":"1","progress":0.9888580256546299,"total":179,"current":178}
+{"_e":"metro:bundling:progress","_t":1783496344880,"id":"1","progress":0.999,"total":179,"current":179}
+{"_e":"metro:bundling:progress","_t":1783496344980,"id":"1","progress":0.999,"total":243,"current":229}
+{"_e":"metro:bundling:progress","_t":1783496345085,"id":"1","progress":0.999,"total":249,"current":248}
+{"_e":"metro:bundling:progress","_t":1783496345918,"id":"1","progress":0.999,"total":249,"current":249}
+{"_e":"metro:bundling:progress","_t":1783496346017,"id":"1","progress":0.999,"total":327,"current":316}
+{"_e":"metro:bundling:done","_t":1783496346075,"id":"1","total":327,"ms":2254.3242}
+{"_e":"metro:bundling:started","_t":1783496349880,"id":"3","platform":"web","environment":null,"entry":"index.js"}
+{"_e":"metro:bundling:progress","_t":1783496349880,"id":"3","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1783496349896,"id":"3","total":1,"ms":16.3548}
+{"_e":"metro:client_log","_t":1783496350079,"level":"info","data":["%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools","font-weight:bold"]}
+{"_e":"metro:client_log","_t":1783496350079,"level":"log","data":["Running application \"main\" with appParams:\n","{\"hydrate\": undefined, \"rootTag\": \"#root\"}","\nDevelopment-level warnings: ON.\nPerformance optimizations: OFF."]}
+{"_e":"metro:bundling:started","_t":1783496418484,"id":"4","platform":"web","environment":null,"entry":"index.js"}
+{"_e":"metro:bundling:progress","_t":1783496418484,"id":"4","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1783496418503,"id":"4","total":1,"ms":19.5976}
+{"_e":"metro:client_log","_t":1783496418680,"level":"info","data":["%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools","font-weight:bold"]}
+{"_e":"metro:client_log","_t":1783496418680,"level":"log","data":["Running application \"main\" with appParams:\n","{\"hydrate\": undefined, \"rootTag\": \"#root\"}","\nDevelopment-level warnings: ON.\nPerformance optimizations: OFF."]}
+{"_e":"metro:bundling:started","_t":1783496529096,"id":"6","platform":"web","environment":null,"entry":"index.js"}
+{"_e":"metro:bundling:progress","_t":1783496529097,"id":"6","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1783496529115,"id":"6","total":1,"ms":18.2065}
+{"_e":"metro:client_log","_t":1783496529306,"level":"info","data":["%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools","font-weight:bold"]}
+{"_e":"metro:client_log","_t":1783496529306,"level":"log","data":["Running application \"main\" with appParams:\n","{\"hydrate\": undefined, \"rootTag\": \"#root\"}","\nDevelopment-level warnings: ON.\nPerformance optimizations: OFF."]}
+{"_e":"metro:client_log","_t":1783496536890,"level":"warn","data":["Cannot record touch end without a touch start.\n","Touch End: {\"identifier\":0,\"pageX\":371,\"pageY\":427,\"timestamp\":7800}\n","Touch Bank: []"]}
+{"_e":"metro:bundling:started","_t":1783496538612,"id":"7","platform":"web","environment":null,"entry":"index.js"}
+{"_e":"metro:client_log","_t":1783496604865,"level":"warn","data":["Cannot record touch end without a touch start.\n","Touch End: {\"identifier\":0,\"pageX\":396,\"pageY\":434,\"timestamp\":75786}\n","Touch Bank: []"]}
+{"_e":"metro:bundling:started","_t":1783496607564,"id":"8","platform":"web","environment":null,"entry":"index.js"}
+{"_e":"metro:bundling:started","_t":1783496613969,"id":"9","platform":"web","environment":null,"entry":"index.js"}
+{"_e":"metro:bundling:progress","_t":1783496613969,"id":"9","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1783496613987,"id":"9","total":1,"ms":17.4323}
+{"_e":"metro:client_log","_t":1783496614184,"level":"info","data":["%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools","font-weight:bold"]}
+{"_e":"metro:client_log","_t":1783496614185,"level":"log","data":["Running application \"main\" with appParams:\n","{\"hydrate\": undefined, \"rootTag\": \"#root\"}","\nDevelopment-level warnings: ON.\nPerformance optimizations: OFF."]}
+{"_e":"metro:bundling:started","_t":1783496614203,"id":"a","platform":"web","environment":null,"entry":"index.js"}
+{"_e":"metro:client_log","_t":1783496616322,"level":"warn","data":["Cannot record touch end without a touch start.\n","Touch End: {\"identifier\":0,\"pageX\":363,\"pageY\":238,\"timestamp\":2414}\n","Touch Bank: []"]}
