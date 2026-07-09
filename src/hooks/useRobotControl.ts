@@ -262,11 +262,23 @@ export function useRobotControl({ apiKey, espIp, ttsEnabled, aiModel, addLog }: 
 
           if (ttsEnabled) {
             try {
-              await Speech.speak(message.content, {
-                language: 'ru-RU',
-                pitch: 1.05,
-                rate: 1.0,
-              });
+              // Strip emojis so TTS doesn't read them aloud (e.g. "grinning face")
+              const cleanText = message.content
+                .replace(/\p{Extended_Pictographic}/gu, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+              if (cleanText) {
+                // Simple language detection: if contains Cyrillic characters, use Russian, else English
+                const hasCyrillic = /[а-яА-ЯёЁ]/i.test(cleanText);
+                const detectedLang = hasCyrillic ? 'ru-RU' : 'en-US';
+
+                Speech.speak(cleanText, {
+                  language: detectedLang,
+                  pitch: 1.05,
+                  rate: 1.0,
+                });
+              }
             } catch (ttsErr: any) {
               addLog(`TTS error: ${ttsErr.message || String(ttsErr)}`, 'error');
             }
