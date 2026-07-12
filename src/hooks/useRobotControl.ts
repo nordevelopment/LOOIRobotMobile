@@ -94,13 +94,13 @@ export function useRobotControl({ apiKey, espIp, ttsEnabled, aiModel, addLog }: 
       } catch (e) { }
 
       const targetUrl = `http://${espIp}/api/move`;
-      addLog(`Sending POST to ${targetUrl} (${direction}, ${duration}ms)`, 'info');
+      addLog(`Sending command to ${targetUrl} (${direction}, ${duration}ms)`, 'info');
 
       setEyeState(direction);
 
       const warningTimeoutId = setTimeout(() => {
-        addLog(`Warning: ESP32 (${espIp}) did not respond within 1.5s. Still waiting...`, 'error');
-      }, 1500);
+        addLog(`Warning: ESP32 (${espIp}) did not respond within 2s. Still waiting...`, 'error');
+      }, 2000);
 
       try {
         const controller = new AbortController();
@@ -235,7 +235,7 @@ export function useRobotControl({ apiKey, espIp, ttsEnabled, aiModel, addLog }: 
           const toolCall = message.tool_calls[0];
           if (toolCall.function.name === 'move_robot') {
             const args = JSON.parse(toolCall.function.arguments);
-            
+
             // Set default duration of 3000ms if not specified or invalid (unless it's 'stop')
             let duration = args.duration;
             if (args.direction !== 'stop' && (!duration || typeof duration !== 'number' || duration <= 0)) {

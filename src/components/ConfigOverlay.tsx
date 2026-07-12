@@ -86,7 +86,7 @@ export function ConfigOverlay({
             <Text style={styles.label}>OpenRouter API Key:</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ваш API-ключ OpenRouter..."
+              placeholder="OpenRouter API KEY"
               placeholderTextColor="#555"
               value={apiKeyInput}
               onChangeText={setApiKeyInput}
@@ -109,7 +109,7 @@ export function ConfigOverlay({
             <Text style={styles.label}>ESP32-S3 IP-адрес:</Text>
             <TextInput
               style={styles.input}
-              placeholder="Например, 192.168.15.50"
+              placeholder="ESP32-S3 IP"
               placeholderTextColor="#555"
               value={espIpInput}
               onChangeText={setEspIpInput}
@@ -125,39 +125,39 @@ export function ConfigOverlay({
               activeOpacity={0.8}
             >
               <Text style={[styles.ttsButtonText, ttsEnabledInput ? styles.ttsButtonTextActive : styles.ttsButtonTextInactive]}>
-                {ttsEnabledInput ? '🔊 Включен (Робот говорит)' : '🔇 Выключен (Без звука)'}
+                {ttsEnabledInput ? '🔊 On (Robot speaks)' : '🔇 Off (No sound)'}
               </Text>
             </TouchableOpacity>
 
-            <Text style={styles.label}>Память диалога ИИ:</Text>
+            <Text style={styles.label}>AI dialog memory:</Text>
             <TouchableOpacity
               style={styles.clearHistoryButton}
               onPress={onClearHistory}
               activeOpacity={0.8}
             >
               <Text style={styles.clearHistoryButtonText}>
-                🧠 Сбросить память диалога ({historyCount} соб.)
+                🧠 Clear dialog memory ({historyCount} соб.)
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.saveButton} onPress={onSaveSettings}>
-              <Text style={styles.saveButtonText}>Сохранить настройки</Text>
+              <Text style={styles.saveButtonText}>Save Settings</Text>
             </TouchableOpacity>
           </View>
 
           {/* Console Debug Logs Card */}
           <View style={styles.card}>
             <View style={styles.logHeader}>
-              <Text style={styles.cardTitle}>Логи консоли (Отладка)</Text>
+              <Text style={styles.cardTitle}>Console Debug Logs</Text>
               <TouchableOpacity onPress={clearLogs}>
-                <Text style={styles.clearLogsText}>Очистить</Text>
+                <Text style={styles.clearLogsText}>Clear</Text>
               </TouchableOpacity>
             </View>
 
             <View style={styles.terminalContainer}>
               {logs.length === 0 ? (
                 <Text style={styles.emptyLogText}>
-                  Логи пусты. Отправьте запрос роботу.
+                  No logs. Send a request to the robot.
                 </Text>
               ) : (
                 logs.map((log) => (

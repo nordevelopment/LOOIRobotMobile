@@ -8,8 +8,8 @@ interface ManualControlPanelProps {
 export function ManualControlPanel({ onMoveCommand }: ManualControlPanelProps) {
   return (
     <View style={styles.manualControlPanel}>
-      <Text style={styles.manualPanelTitle}>Ручной пульт управления моторами 🕹</Text>
-      
+      <Text style={styles.manualPanelTitle}>Remote control 🕹</Text>
+
       {/* Row 1: Forward */}
       <View style={styles.manualButtonsRow}>
         <TouchableOpacity
@@ -17,7 +17,7 @@ export function ManualControlPanel({ onMoveCommand }: ManualControlPanelProps) {
           onPress={() => onMoveCommand('forward', 3000)}
           activeOpacity={0.7}
         >
-          <Text style={[styles.manualButtonText, { color: '#4CD964' }]}>▲ Вперед</Text>
+          <Text style={[styles.manualButtonText, { color: '#4CD964' }]}>▲ Forward</Text>
         </TouchableOpacity>
       </View>
 
@@ -28,7 +28,7 @@ export function ManualControlPanel({ onMoveCommand }: ManualControlPanelProps) {
           onPress={() => onMoveCommand('left', 3000)}
           activeOpacity={0.7}
         >
-          <Text style={[styles.manualButtonText, { color: '#00d0ffff' }]}>◀ Влево</Text>
+          <Text style={[styles.manualButtonText, { color: '#00d0ffff' }]}>◀ Left</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -36,7 +36,7 @@ export function ManualControlPanel({ onMoveCommand }: ManualControlPanelProps) {
           onPress={() => onMoveCommand('stop', 0)}
           activeOpacity={0.7}
         >
-          <Text style={[styles.manualButtonText, { color: '#FF3B30' }]}>🛑 СТОП</Text>
+          <Text style={[styles.manualButtonText, { color: '#FF3B30' }]}>🛑 STOP</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -44,7 +44,7 @@ export function ManualControlPanel({ onMoveCommand }: ManualControlPanelProps) {
           onPress={() => onMoveCommand('right', 3000)}
           activeOpacity={0.7}
         >
-          <Text style={[styles.manualButtonText, { color: '#00d0ffff' }]}>▶ Вправо</Text>
+          <Text style={[styles.manualButtonText, { color: '#00d0ffff' }]}>▶ Right</Text>
         </TouchableOpacity>
       </View>
 
@@ -55,7 +55,7 @@ export function ManualControlPanel({ onMoveCommand }: ManualControlPanelProps) {
           onPress={() => onMoveCommand('backward', 3000)}
           activeOpacity={0.7}
         >
-          <Text style={[styles.manualButtonText, { color: '#FFCC00' }]}>▼ Назад</Text>
+          <Text style={[styles.manualButtonText, { color: '#FFCC00' }]}>▼ Backward</Text>
         </TouchableOpacity>
       </View>
     </View>
