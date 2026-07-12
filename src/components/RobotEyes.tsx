@@ -39,6 +39,9 @@ export function RobotEyes({ eyeState, speechText }: RobotEyesProps) {
         return '#4CD964'; // Green - move forward
       case 'backward':
         return '#FFCC00'; // Yellow - move backward
+      case 'left':
+      case 'right':
+        return '#00d0ffff'; // Neon Cyan/Blue
       case 'stop':
         return '#FF3B30'; // Red - stop
       case 'thinking':

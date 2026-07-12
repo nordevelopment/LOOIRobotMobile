@@ -82,6 +82,9 @@ export default function App() {
         return '#4CD964'; // Green
       case 'backward':
         return '#FFCC00'; // Yellow
+      case 'left':
+      case 'right':
+        return '#00d0ffff'; // Neon Cyan/Blue
       case 'stop':
         return '#FF3B30'; // Red
       case 'thinking':

@@ -5,7 +5,7 @@ export interface LogEntry {
   type: 'info' | 'success' | 'error' | 'sent' | 'received';
 }
 
-export type EyeStateType = 'normal' | 'forward' | 'backward' | 'stop' | 'thinking';
+export type EyeStateType = 'normal' | 'forward' | 'backward' | 'left' | 'right' | 'stop' | 'thinking';
 
 export interface RobotSettings {
   apiKey: string;

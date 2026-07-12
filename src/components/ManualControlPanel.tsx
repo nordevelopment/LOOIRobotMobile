@@ -2,20 +2,33 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 
 interface ManualControlPanelProps {
-  onMoveCommand: (direction: 'forward' | 'backward' | 'stop', duration: number) => Promise<void>;
+  onMoveCommand: (direction: 'forward' | 'backward' | 'left' | 'right' | 'stop', duration: number) => Promise<void>;
 }
 
 export function ManualControlPanel({ onMoveCommand }: ManualControlPanelProps) {
   return (
     <View style={styles.manualControlPanel}>
       <Text style={styles.manualPanelTitle}>Ручной пульт управления моторами 🕹</Text>
+      
+      {/* Row 1: Forward */}
       <View style={styles.manualButtonsRow}>
         <TouchableOpacity
           style={[styles.manualButton, { borderColor: '#4CD964' }]}
-          onPress={() => onMoveCommand('forward', 1500)}
+          onPress={() => onMoveCommand('forward', 3000)}
           activeOpacity={0.7}
         >
           <Text style={[styles.manualButtonText, { color: '#4CD964' }]}>▲ Вперед</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Row 2: Left, STOP, Right */}
+      <View style={[styles.manualButtonsRow, { marginTop: 10 }]}>
+        <TouchableOpacity
+          style={[styles.manualButton, { borderColor: '#00d0ffff' }]}
+          onPress={() => onMoveCommand('left', 3000)}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.manualButtonText, { color: '#00d0ffff' }]}>◀ Влево</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -27,8 +40,19 @@ export function ManualControlPanel({ onMoveCommand }: ManualControlPanelProps) {
         </TouchableOpacity>
 
         <TouchableOpacity
+          style={[styles.manualButton, { borderColor: '#00d0ffff' }]}
+          onPress={() => onMoveCommand('right', 3000)}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.manualButtonText, { color: '#00d0ffff' }]}>▶ Вправо</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Row 3: Backward */}
+      <View style={[styles.manualButtonsRow, { marginTop: 10 }]}>
+        <TouchableOpacity
           style={[styles.manualButton, { borderColor: '#FFCC00' }]}
-          onPress={() => onMoveCommand('backward', 1500)}
+          onPress={() => onMoveCommand('backward', 3000)}
           activeOpacity={0.7}
         >
           <Text style={[styles.manualButtonText, { color: '#FFCC00' }]}>▼ Назад</Text>

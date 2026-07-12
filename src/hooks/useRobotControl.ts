@@ -88,7 +88,7 @@ export function useRobotControl({ apiKey, espIp, ttsEnabled, aiModel, addLog }: 
 
   // Send physical movement command to ESP32 board
   const sendMoveCommand = useCallback(
-    async (direction: 'forward' | 'backward' | 'stop', duration: number) => {
+    async (direction: 'forward' | 'backward' | 'left' | 'right' | 'stop', duration: number) => {
       try {
         await Speech.stop();
       } catch (e) { }
@@ -200,16 +200,16 @@ export function useRobotControl({ apiKey, espIp, ttsEnabled, aiModel, addLog }: 
                     properties: {
                       direction: {
                         type: 'string',
-                        enum: ['forward', 'backward', 'stop'],
+                        enum: ['forward', 'backward', 'left', 'right', 'stop'],
                         description:
-                          'Direction of movement: forward (forward), backward (backward), stop (stop)',
+                          'Direction of movement: forward (forward), backward (backward), left (turn left), right (turn right), stop (stop)',
                       },
                       duration: {
                         type: 'integer',
-                        description: 'Time of robot movement in milliseconds.',
+                        description: 'Time of robot movement in milliseconds. Default is 3000.',
                       },
                     },
-                    required: ['direction', 'duration'],
+                    required: ['direction'],
                   },
                 },
               },
@@ -235,17 +235,26 @@ export function useRobotControl({ apiKey, espIp, ttsEnabled, aiModel, addLog }: 
           const toolCall = message.tool_calls[0];
           if (toolCall.function.name === 'move_robot') {
             const args = JSON.parse(toolCall.function.arguments);
-            addLog(`Tool call received: move_robot(${args.direction}, ${args.duration}ms)`, 'received');
+            
+            // Set default duration of 3000ms if not specified or invalid (unless it's 'stop')
+            let duration = args.duration;
+            if (args.direction !== 'stop' && (!duration || typeof duration !== 'number' || duration <= 0)) {
+              duration = 3000;
+            } else if (args.direction === 'stop') {
+              duration = 0;
+            }
+
+            addLog(`Tool call received: move_robot(${args.direction}, ${duration}ms)`, 'received');
 
             // Record physical movement in chat history as a log entry
-            const actionText = `[Выполнено движение: ${args.direction}, ${args.duration}мс]`;
+            const actionText = `[Выполнено движение: ${args.direction}, ${duration}мс]`;
             await updateChatHistory([
               ...chatHistory,
               newUserMessage,
               { role: 'assistant', content: actionText }
             ]);
 
-            await sendMoveCommand(args.direction, args.duration);
+            await sendMoveCommand(args.direction, duration);
           }
         }
         // 2. Plain text response
