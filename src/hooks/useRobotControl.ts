@@ -246,12 +246,59 @@ export function useRobotControl({ apiKey, espIp, ttsEnabled, aiModel, addLog }: 
 
             addLog(`Tool call received: move_robot(${args.direction}, ${duration}ms)`, 'received');
 
-            // Record physical movement in chat history as a log entry
-            const actionText = `[Выполнено движение: ${args.direction}, ${duration}мс]`;
+            // Generate clean conversational speech and chat bubbles instead of raw logs
+            let verbalResponse = message.content || '';
+
+            if (!verbalResponse) {
+              const dirTranslationsEn: Record<string, string> = {
+                forward: 'forward',
+                backward: 'backward',
+                left: 'left',
+                right: 'right',
+                stop: 'stopping',
+              };
+
+              const directionName = dirTranslationsEn[args.direction] || args.direction;
+
+              if (args.direction === 'stop') {
+                verbalResponse = 'Stopping.';
+              } else {
+                const seconds = duration / 1000;
+                verbalResponse = `Moving ${directionName} for ${seconds} seconds.`;
+              }
+            }
+
+            // Speak and show speech bubble for the movement
+            showSpeechBubble(verbalResponse);
+
+            if (ttsEnabled && verbalResponse) {
+              try {
+                // Strip emojis so TTS doesn't read them aloud
+                const cleanText = verbalResponse
+                  .replace(/\p{Extended_Pictographic}/gu, '')
+                  .replace(/\s+/g, ' ')
+                  .trim();
+
+                if (cleanText) {
+                  const hasCyrillic = /[а-яА-ЯёЁ]/i.test(cleanText);
+                  const detectedLang = hasCyrillic ? 'ru-RU' : 'en-US';
+
+                  Speech.speak(cleanText, {
+                    language: detectedLang,
+                    pitch: 1.05,
+                    rate: 1.0,
+                  });
+                }
+              } catch (ttsErr: any) {
+                addLog(`TTS error: ${ttsErr.message || String(ttsErr)}`, 'error');
+              }
+            }
+
+            // Record clean conversational response in history to avoid model confusion on next turns
             await updateChatHistory([
               ...chatHistory,
               newUserMessage,
-              { role: 'assistant', content: actionText }
+              { role: 'assistant', content: verbalResponse }
             ]);
 
             await sendMoveCommand(args.direction, duration);
@@ -300,7 +347,7 @@ export function useRobotControl({ apiKey, espIp, ttsEnabled, aiModel, addLog }: 
         setIsLoading(false);
       }
     },
-    [apiKey, addLog, sendMoveCommand, showSpeechBubble]
+    [apiKey, aiModel, ttsEnabled, chatHistory, addLog, sendMoveCommand, showSpeechBubble, updateChatHistory]
   );
 
   return {

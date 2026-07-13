@@ -56,14 +56,14 @@ export default function App() {
   // 3. Speech Recognition Hook
   const { isListening, startListening, stopListening } = useSpeech({
     onStart: () => {
-      addLog('Микрофон активен. Говорите команду...', 'info');
+      addLog('Microphone active. Speak your command...', 'info');
     },
     onEnd: () => {
-      addLog('Голосовой ввод завершен, распознавание...', 'info');
+      addLog('Voice input ended, processing...', 'info');
     },
     onResult: (text) => {
       setPrompt(text);
-      addLog(`Распознано: "${text}"`, 'success');
+      addLog(`Recognized: "${text}"`, 'success');
       setTimeout(() => {
         sendPromptToAI(text);
         setPrompt('');
@@ -71,7 +71,7 @@ export default function App() {
     },
     onError: (err) => {
       setEyeState('normal');
-      addLog(`Ошибка Speech-to-Text: ${err}`, 'error');
+      addLog(`Speech-to-Text error: ${err}`, 'error');
     },
   });
 
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   warningBanner: {
-    backgroundColor: 'rgba(255, 159, 10, 0.15)', // Полупрозрачный оранжевый
+    backgroundColor: 'rgba(255, 159, 10, 0.15)', // Semi-transparent orange
     borderColor: 'rgba(255, 159, 10, 0.3)',
     borderBottomWidth: 1.5,
     paddingVertical: 12,
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   warningBannerText: {
-    color: '#FFCC00', // Желтый/оранжевый
+    color: '#FFCC00', // Yellow/orange
     fontSize: 13,
     fontWeight: 'bold',
     textAlign: 'center',
